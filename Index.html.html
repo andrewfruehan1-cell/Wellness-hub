@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Wellness Hub"/>
+<meta name="theme-color" content="#060c14"/>
+<title>Andrew's Wellness Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #060c14;
+    --surface: #0d1825;
+    --border: #1e2a3a;
+    --border2: #111827;
+    --text: #f1f5f9;
+    --muted: #64748b;
+    --dim: #334155;
+    --dimmer: #1e2a3a;
+    --accent: #f97316;
+    --safe-top: env(safe-area-inset-top);
+    --safe-bottom: env(safe-area-inset-bottom);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', system-ui, sans-serif; overscroll-behavior: none; }
+  body { padding-top: var(--safe-top); }
+
+  .app { display: flex; flex-direction: column; min-height: 100dvh; }
+
+  /* HEADER */
+  .header {
+    padding: 18px 16px 14px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.4s;
+    flex-shrink: 0;
+  }
+  .header-inner { max-width: 680px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; }
+  .header-label { font-size: 9px; letter-spacing: 4px; text-transform: uppercase; font-weight: 700; margin-bottom: 3px; transition: color 0.4s; }
+  .header h1 { font-family: 'Syne', sans-serif; font-size: 21px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 2px; }
+  .header-sub { font-size: 10px; color: var(--dim); }
+  .header-date { text-align: right; }
+  .header-date .day { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; transition: color 0.4s; }
+  .header-date .date { font-size: 9px; color: var(--dim); }
+  .header-date .lbl { font-size: 9px; color: var(--dim); letter-spacing: 1px; text-transform: uppercase; }
+
+  /* NAV */
+  .nav { background: #0a0f1a; border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; scrollbar-width: none; }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav-inner { display: flex; max-width: 680px; margin: 0 auto; }
+  .nav-btn { flex: 1; min-width: 60px; padding: 10px 4px; background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.2s; color: var(--dim); }
+  .nav-btn.active { border-bottom-color: var(--accent); }
+  .nav-btn .nav-ic { font-size: 15px; display: block; }
+  .nav-btn .nav-lb { font-size: 8px; font-weight: 700; margin-top: 2px; letter-spacing: 0.5px; text-transform: uppercase; display: block; transition: color 0.2s; }
+  .nav-btn.active .nav-lb { color: var(--accent); }
+
+  /* CONTENT */
+  .content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .inner { max-width: 680px; margin: 0 auto; padding: 14px 14px calc(32px + var(--safe-bottom)); }
+
+  /* CARDS */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; }
+  .card-accent { border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; }
+  .section-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; margin-bottom: 10px; }
+
+  /* PROGRESS BAR */
+  .bar-track { background: var(--dimmer); border-radius: 99px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
+
+  /* DAY PICKER */
+  .day-picker { display: flex; gap: 4px; margin-bottom: 14px; overflow-x: auto; scrollbar-width: none; }
+  .day-picker::-webkit-scrollbar { display: none; }
+  .day-btn { flex: 0 0 auto; width: 42px; padding: 7px 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.2s; }
+  .day-btn span { display: block; font-size: 9px; font-weight: 800; letter-spacing: 0.5px; color: var(--dim); }
+
+  /* CHECK ITEM */
+  .check-item { display: flex; align-items: flex-start; gap: 10px; padding: 11px 14px; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid var(--border2); }
+  .check-item:last-child { border-bottom: none; }
+  .check-item.done { background: #0a1a0e; }
+  .check-box { width: 18px; height: 18px; border-radius: 5px; border: 2px solid var(--dim); background: transparent; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .check-box.checked { background: var(--accent); border-color: var(--accent); }
+  .check-text { font-size: 12px; color: #cbd5e1; transition: all 0.15s; }
+  .check-text.done { color: var(--dim); text-decoration: line-through; }
+
+  /* RING SVG */
+  .ring-wrap { text-align: center; }
+  .ring-inner { margin-top: -48px; height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .ring-val { font-size: 10px; font-weight: 800; color: var(--text); display: block; }
+  .ring-target { font-size: 7px; color: var(--muted); display: block; }
+  .ring-label { font-size: 8px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px; }
+
+  /* DAILY TILES */
+  .tiles { display: flex; gap: 6px; margin-top: 12px; }
+  .tile { flex: 1; background: #111827; border: 1px solid var(--border); border-radius: 8px; padding: 8px 4px; text-align: center; cursor: pointer; transition: all 0.2s; }
+  .tile .tile-ic { font-size: 16px; display: block; }
+  .tile .tile-lb { font-size: 8px; color: var(--dim); font-weight: 700; margin-top: 3px; text-transform: uppercase; display: block; transition: color 0.2s; }
+
+  /* MORNING FLOW */
+  .flow { display: flex; align-items: center; }
+  .flow-stop { text-align: center; min-width: 44px; }
+  .flow-stop .flow-ic { font-size: 18px; display: block; }
+  .flow-stop .flow-lb { font-size: 8px; color: #94a3b8; margin-top: 2px; display: block; }
+  .flow-line { flex: 1; height: 1px; background: var(--border); margin: 0 2px; margin-bottom: 8px; }
+
+  /* WATER */
+  .water-grid { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+  .water-drop { width: 22px; height: 22px; border-radius: 4px; cursor: pointer; font-size: 11px; display: flex; align-items: center; justify-content: center; background: #111827; border: 1px solid var(--border); transition: all 0.15s; }
+  .water-drop.filled { background: #0e4166; border-color: #38bdf8; }
+
+  /* ENERGY */
+  .energy-row { display: flex; gap: 3px; }
+  .energy-btn { flex: 1; padding: 5px 0; text-align: center; cursor: pointer; font-size: 15px; background: transparent; border: 1px solid transparent; border-radius: 6px; transition: all 0.15s; }
+  .energy-btn.selected { background: #f59e0b22; border-color: #f59e0b; }
+
+  /* EXERCISE LIST */
+  .ex-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border2); }
+  .ex-item:last-child { border-bottom: none; }
+  .ex-num { width: 20px; height: 20px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 900; flex-shrink: 0; }
+  .ex-text { font-size: 12px; color: #cbd5e1; }
+
+  /* WEEK STRIP */
+  .week-strip { display: flex; gap: 5px; }
+  .week-cell { flex: 1; border: 1px solid var(--border); border-radius: 8px; padding: 7px 0; text-align: center; cursor: pointer; transition: all 0.2s; }
+  .week-cell span { display: block; font-size: 8px; font-weight: 800; color: var(--dim); }
+  .week-cell em { display: block; font-size: 12px; margin-top: 3px; font-style: normal; }
+
+  /* WEIGHT INPUT */
+  .weight-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .weight-input { flex: 1; background: #111827; border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; color: white; font-size: 13px; font-family: inherit; outline: none; }
+  .weight-btn { background: #a855f7; border: none; border-radius: 8px; padding: 9px 16px; color: white; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
+  .weight-entry { display: flex; justify-content: space-between; padding: 6px 10px; background: #111827; border-radius: 7px; font-size: 12px; margin-bottom: 4px; }
+
+  /* STAT ROW */
+  .stat-row { margin-bottom: 12px; }
+  .stat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .stat-label { font-size: 12px; color: #94a3b8; }
+  .stat-val { font-size: 12px; font-weight: 800; }
+
+  /* MEAL ROW */
+  .meal-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border2); }
+  .meal-row:last-child { border-bottom: none; }
+  .meal-ic { font-size: 16px; flex-shrink: 0; }
+  .meal-type { font-size: 8px; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; }
+  .meal-name { font-size: 12px; color: #e2e8f0; font-weight: 600; margin-top: 1px; }
+
+  /* MACRO ROW */
+  .macro-row { display: flex; justify-content: space-around; margin-top: 4px; }
+
+  /* SUCCESS CARD */
+  .success { background: #14532d; border: 1px solid #22c55e; border-radius: 12px; padding: 16px; text-align: center; margin-top: 8px; }
+  .success h3 { font-family: 'Syne', sans-serif; font-size: 14px; color: #22c55e; margin-bottom: 4px; }
+  .success p { font-size: 11px; color: #86efac; }
+
+  /* MOTIVATION */
+  .motive { background: linear-gradient(135deg, #0d1825, #111827); border: 1px solid var(--border); border-radius: 14px; padding: 20px; text-align: center; margin-top: 8px; }
+  .motive h2 { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; margin-bottom: 6px; }
+  .motive p { font-size: 12px; color: var(--muted); line-height: 1.8; }
+  .motive .emoji-row { margin-top: 14px; display: flex; justify-content: center; gap: 10px; font-size: 22px; }
+
+  /* KNEE WARNING */
+  .knee-warn { background: #2d1515; border: 1px solid #ef4444; border-radius: 10px; padding: 10px 14px; margin-bottom: 10px; font-size: 11px; color: #fca5a5; line-height: 1.5; }
+
+  /* WEEKLY CAL */
+  .cal-row { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
+  .cal-day { width: 24px; font-size: 9px; color: var(--muted); font-weight: 700; }
+  .cal-val { font-size: 10px; color: var(--muted); width: 38px; text-align: right; }
+
+  @media (prefers-color-scheme: light) {
+    :root { --bg: #060c14; --surface: #0d1825; }
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .inner { animation: fadeIn 0.25s ease; }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="header" id="header">
+    <div class="header-inner">
+      <div>
+        <div class="header-label" id="headerLabel">Andrew's Command Center</div>
+        <h1>Daily Wellness Hub</h1>
+        <div class="header-sub">Nutrition · Training · Recovery · Progress</div>
+      </div>
+      <div class="header-date">
+        <div class="lbl">Today</div>
+        <div class="day" id="headerDay">Mon</div>
+        <div class="date" id="headerDate"></div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <button class="nav-btn active" onclick="switchTab('today',this)">
+        <span class="nav-ic">📅</span><span class="nav-lb">Today</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('nutrition',this)">
+        <span class="nav-ic">🥗</span><span class="nav-lb">Nutrition</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('training',this)">
+        <span class="nav-ic">💪</span><span class="nav-lb">Training</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('prep',this)">
+        <span class="nav-ic">🗓</span><span class="nav-lb">Prep</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('progress',this)">
+        <span class="nav-ic">📈</span><span class="nav-lb">Progress</span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="content">
+    <div class="inner" id="tabContent"></div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const FULL = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+
+const WORKOUTS = [
+  { focus:"Chest & Triceps", tag:"Push Day", color:"#f97316", icon:"💪",
+    lifts:["DB Flat Bench Press — 4×10–12","Incline DB Press — 3×10–12","Cable Fly Low→High — 3×12–15","Cable Fly High→Low — 3×12–15","DB Overhead Tricep Ext. — 3×12–15","Cable Tricep Pushdown — 3×12–15","Cable Tricep Kickback — 2×15"],
+    cardio:"Elliptical · 30–60 min · Moderate" },
+  { focus:"Back & Biceps", tag:"Pull Day", color:"#3b82f6", icon:"🏋️",
+    lifts:["DB Single-Arm Row — 4×10–12 ea","Cable Seated Row — 3×10–12","Cable Lat Pulldown — 3×10–12","Cable Straight-Arm Pulldown — 3×12–15","DB Hammer Curl — 3×12–15","Cable Curl — 3×12–15","Incline DB Curl — 2×12"],
+    cardio:"Rowing Machine · 30–60 min · Moderate" },
+  { focus:"Shoulders & Core", tag:"Press + Stability", color:"#a855f7", icon:"🎯",
+    lifts:["DB Seated Shoulder Press — 4×10–12","DB Lateral Raise — 3×12–15","Cable Face Pull — 3×15","Cable Lateral Raise — 3×12–15","DB Front Raise — 2×12","Cable Crunch — 3×15–20","Pallof Press — 3×12 ea","Plank — 3×30–45s"],
+    cardio:"Elliptical · 30–60 min · Moderate" },
+  { focus:"Legs (Knee-Friendly)", tag:"Lower Body ⚠️", color:"#22c55e", icon:"🦵",
+    lifts:["DB Romanian Deadlift — 4×10–12","DB Sumo Squat — 3×12–15","Cable Hip Abduction — 3×15 ea","Seated Leg Curl — 3×12–15","Leg Press — 3×12–15","Standing Calf Raise — 4×15–20","Glute Bridge — 3×15"],
+    cardio:"Stationary Bike (easy) · 30–45 min · Low" },
+  { focus:"Full Body Compound", tag:"Strength + Burn", color:"#ef4444", icon:"🔥",
+    lifts:["DB Deadlift — 4×8–10","DB Incline Row — 3×10–12 ea","Cable Woodchop — 3×12 ea","DB Arnold Press — 3×10–12","Cable Chest Press — 3×12–15","DB Curl to Press — 3×10–12","Cable Pull-Through — 3×15"],
+    cardio:"Elliptical · 30–60 min · Moderate–High" },
+  { focus:"Stretch & Recovery", tag:"Mobility + Low Cardio", color:"#06b6d4", icon:"🧘",
+    lifts:["Cross-body shoulder stretch — 30s ea","Overhead tricep stretch — 30s ea","Chest doorway stretch — 45s","Thread the needle — 30s ea","Hamstring stretch (supine) — 45s ea","Figure-4 piriformis — 45s ea","Hip flexor lunge stretch — 45s ea","Cat-cow — 10 slow reps","Child's pose — 60s","Box breathing — 3 min"],
+    cardio:"Outdoor Walk · 30–60 min · Low" },
+  { focus:"Rest & Recover", tag:"Full Rest Day", color:"#64748b", icon:"😴",
+    lifts:["Full rest or gentle walk","Foam roll if desired","Stay hydrated — 8+ glasses","Meal prep for the week ahead"],
+    cardio:"Optional: 20 min easy walk" },
+];
+
+const MEALS = [
+  { b:"Sweet Potato Egg Cups", l:"Grilled Chicken Salad", d:"Beef & Veggie Stir-Fry", s:"Apple + Almond Butter", cal:2490, p:179, c:248, f:79 },
+  { b:"Banana & Hard-Boiled Eggs", l:"Chicken Lettuce Wraps", d:"Baked Salmon & Sweet Potato", s:"Berries & Coconut Yogurt", cal:2480, p:178, c:247, f:78 },
+  { b:"Almond Butter Banana Roll", l:"Turkey & Avocado Bowl", d:"Slow Cooker Chicken Thighs", s:"Celery & Guacamole", cal:2510, p:181, c:252, f:80 },
+  { b:"Coconut Chia Pudding", l:"Leftover Chicken Bowl", d:"Grass-Fed Burger Patties", s:"Nuts & Dried Mango", cal:2500, p:180, c:250, f:79 },
+  { b:"Smoked Salmon Plate", l:"Chicken & Veggie Soup", d:"Pork Tenderloin & Brussels", s:"Fresh Fruit Salad", cal:2495, p:179, c:249, f:78 },
+  { b:"Full Paleo Plate", l:"Tuna Stuffed Peppers", d:"Grilled Steak & Chimichurri", s:"Plantain Chips & Salsa", cal:2520, p:182, c:253, f:82 },
+  { b:"Acai Smoothie Bowl", l:"Leftover Steak Salad", d:"One-Pan Roasted Chicken", s:"Coconut Yogurt & Berries", cal:2470, p:176, c:246, f:77 },
+];
+
+const PREP = [
+  "Boil 12 eggs for the week",
+  "Pre-measure 7 protein powder scoops",
+  "Dice & roast 4 large sweet potatoes",
+  "Bake sweet potato egg cups (Mon–Wed)",
+  "Roast broccoli & zucchini tray",
+  "Roast Brussels sprouts (for Friday)",
+  "Grill 4 chicken breasts",
+  "Brown 1 lb ground turkey",
+  "Brown 1 lb ground beef",
+  "Make 4 chia pudding jars",
+  "Wash & dry all produce",
+  "Pre-portion mixed nuts into 7 bags",
+  "Make chimichurri sauce",
+  "Set applesauce pouches on counter",
+  "Label all containers by day",
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let state = {
+  tab: "today",
+  dayIdx: getTodayIdx(),
+  checks: {},
+  water: 0,
+  energy: null,
+  weightInput: "",
+  weightLog: [],
+};
+
+// Load from localStorage
+try { const s = localStorage.getItem("awh"); if(s) { const p = JSON.parse(s); state = {...state, ...p, tab:"today", dayIdx:getTodayIdx()}; } } catch(e){}
+
+function save() {
+  try { localStorage.setItem("awh", JSON.stringify({ checks: state.checks, water: state.water, energy: state.energy, weightLog: state.weightLog })); } catch(e){}
+}
+
+function getTodayIdx() { const d = new Date().getDay(); return d === 0 ? 6 : d - 1; }
+
+function toggle(key) { state.checks[key] = !state.checks[key]; save(); render(); }
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function ring(v, t, color, label) {
+  const r = 20, size = 48, cx = 24, cy = 24;
+  const circ = 2 * Math.PI * r;
+  const dash = Math.min(v/t, 1) * circ;
+  return `<div class="ring-wrap">
+    <svg width="${size}" height="${size}" style="transform:rotate(-90deg);display:block;margin:0 auto">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#1e2a3a" stroke-width="4"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="4"
+        stroke-dasharray="${dash} ${circ}" stroke-linecap="round"/>
+    </svg>
+    <div class="ring-inner"><span class="ring-val">${v}</span><span class="ring-target">/${t}</span></div>
+    <div class="ring-label">${label}</div>
+  </div>`;
+}
+
+function bar(pct, color, h=5) {
+  return `<div class="bar-track" style="height:${h}px"><div class="bar-fill" style="width:${Math.min(pct,100)}%;height:${h}px;background:${color}"></div></div>`;
+}
+
+function dayPicker(active, colorFn) {
+  return `<div class="day-picker">${DAYS.map((d,i) => {
+    const c = colorFn(i);
+    return `<button class="day-btn" onclick="setDay(${i})" style="background:${active===i?c+'22':'#0d1825'};border-color:${active===i?c:'#1e2a3a'}">
+      <span style="color:${active===i?c:'#334155'}">${d.toUpperCase()}</span>
+    </button>`;
+  }).join("")}</div>`;
+}
+
+function setDay(i) { state.dayIdx = i; render(); }
+
+function updateColor() {
+  const w = WORKOUTS[state.dayIdx];
+  document.getElementById("header").style.background = `linear-gradient(135deg,${w.color}18 0%,#060c14 70%)`;
+  document.getElementById("header").style.borderBottomColor = w.color + "33";
+  document.getElementById("headerLabel").style.color = w.color;
+  document.getElementById("headerDay").style.color = w.color;
+  document.querySelectorAll(".nav-btn.active").forEach(b => b.style.borderBottomColor = w.color);
+  document.querySelectorAll(".nav-btn.active .nav-lb").forEach(b => b.style.color = w.color);
+}
+
+// ─── TABS ────────────────────────────────────────────────────────────────────
+function renderToday() {
+  const i = state.dayIdx, w = WORKOUTS[i], m = MEALS[i], c = w.color;
+  const keys = ["pre","lift","cardio","meals"];
+  const icons = ["⚡","🏋️","🏃","🥗"];
+  const labels = ["Pre-WO","Lifting","Cardio","Meals"];
+  const done = keys.filter(k => state.checks[`${i}-${k}`]).length;
+  const pct = (done/4)*100;
+
+  return `
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:11px;color:#64748b;letter-spacing:1px;text-transform:uppercase">Today's Progress</span>
+      <span style="font-family:'Syne',sans-serif;font-size:15px;font-weight:900;color:${done===4?'#22c55e':c}">${done}/4 complete</span>
+    </div>
+    ${bar(pct, done===4?"#22c55e":c, 7)}
+    <div class="tiles">
+      ${keys.map((k,j) => {
+        const key = `${i}-${k}`;
+        const chk = state.checks[key];
+        return `<div class="tile" onclick="toggle('${key}')" style="background:${chk?c+'22':'#111827'};border-color:${chk?c:'#1e2a3a'}">
+          <span class="tile-ic">${chk?"✅":icons[j]}</span>
+          <span class="tile-lb" style="color:${chk?c:'#334155'}">${labels[j]}</span>
+        </div>`;
+      }).join("")}
+    </div>
+  </div>
+
+  <div class="card-accent" style="background:${c}12;border:1px solid ${c}44">
+    <div class="section-label" style="color:${c}">Morning Flow</div>
+    <div class="flow">
+      ${[["⚡","Applesauce"],["🏋️","Workout"],["🥤","Shake"],["☀️","Breakfast"],["💼","Work"]].map(([ic,lb],j,arr) =>
+        `<div class="flow-stop"><span class="flow-ic">${ic}</span><span class="flow-lb">${lb}</span></div>${j<arr.length-1?'<div class="flow-line"></div>':''}`
+      ).join("")}
+    </div>
+  </div>
+
+  <div class="card-accent" style="background:${c}10;border:1px solid ${c}33">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span style="font-size:22px">${w.icon}</span>
+      <div>
+        <div style="font-size:9px;color:${c};letter-spacing:2px;text-transform:uppercase;font-weight:700">${w.tag}</div>
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800">${w.focus}</div>
+      </div>
+    </div>
+    ${w.lifts.slice(0,4).map(ex => `<div style="font-size:11px;color:#475569;margin-bottom:3px"><span style="color:${c}">›</span> ${ex}</div>`).join("")}
+    ${w.lifts.length>4?`<div style="font-size:10px;color:#334155;margin-top:4px">+${w.lifts.length-4} more in Training tab</div>`:""}
+    <div style="margin-top:10px;padding-top:10px;border-top:1px solid ${c}22;font-size:11px;color:#475569">🏃 ${w.cardio}</div>
+  </div>
+
+  <div class="card" style="padding:0;overflow:hidden">
+    ${[["☀️","Breakfast",m.b,"#f59e0b"],["🌿","Lunch",m.l,"#22c55e"],["🌙","Dinner",m.d,"#6366f1"],["🍎","Snack",m.s,"#ec4899"]].map(([ic,lb,meal,mc]) =>
+      `<div class="meal-row"><span class="meal-ic">${ic}</span><div><div class="meal-type" style="color:${mc}">${lb}</div><div class="meal-name">${meal}</div></div></div>`
+    ).join("")}
+  </div>
+
+  <div style="display:flex;gap:8px">
+    <div class="card" style="flex:1">
+      <div class="section-label" style="color:#38bdf8">Water</div>
+      <div class="water-grid">
+        ${Array.from({length:8},(_,j) => `<div class="water-drop ${j<state.water?'filled':''}" onclick="setWater(${j})">${j<state.water?'💧':'·'}</div>`).join("")}
+      </div>
+      <div style="font-size:10px;color:#334155">${state.water}/8 glasses</div>
+    </div>
+    <div class="card" style="flex:1">
+      <div class="section-label" style="color:#f59e0b">Energy</div>
+      <div class="energy-row">
+        ${["😴","😐","🙂","😄","🔥"].map((e,j) =>
+          `<div class="energy-btn ${state.energy===j?'selected':''}" onclick="setEnergy(${j})">${e}</div>`
+        ).join("")}
+      </div>
+      <div style="font-size:10px;color:#334155;margin-top:6px">${state.energy!==null?["Rest needed","Feeling okay","Pretty good","Great day","Beast mode!"][state.energy]:"Tap to log"}</div>
+    </div>
+  </div>`;
+}
+
+function renderNutrition() {
+  const i = state.dayIdx, m = MEALS[i];
+  return `
+  ${dayPicker(i, () => "#22c55e")}
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800">${FULL[i]} Macros</div>
+        <div style="font-size:10px;color:#334155;margin-top:1px">Includes pre-WO + shake</div>
+      </div>
+      <div style="background:#14532d;border:1px solid #22c55e;border-radius:99px;padding:4px 12px;font-family:'Syne',sans-serif;font-size:13px;font-weight:800">${m.cal} cal</div>
+    </div>
+    <div class="macro-row">
+      ${ring(m.p,180,"#3b82f6","Protein")}
+      ${ring(m.c,250,"#f59e0b","Carbs")}
+      ${ring(m.f,80,"#ef4444","Fat")}
+    </div>
+  </div>
+
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="padding:10px 14px;border-bottom:1px solid #111827;font-size:9px;color:#f97316;letter-spacing:2px;text-transform:uppercase;font-weight:700">Morning Protocol</div>
+    ${[["⚡","Pre-Workout","Applesauce pouch · 50 cal · 13g carbs","#f97316"],["🥤","Post-Workout","Protein shake + banana · 280 cal · 30g protein","#38bdf8"]].map(([ic,lb,desc,c]) =>
+      `<div class="meal-row"><span class="meal-ic">${ic}</span><div><div class="meal-type" style="color:${c}">${lb}</div><div style="font-size:11px;color:#94a3b8;margin-top:1px">${desc}</div></div></div>`
+    ).join("")}
+    ${[["☀️","Breakfast",m.b,"#f59e0b"],["🌿","Lunch",m.l,"#22c55e"],["🌙","Dinner",m.d,"#6366f1"],["🍎","Snack",m.s,"#ec4899"]].map(([ic,lb,meal,mc]) =>
+      `<div class="meal-row"><span class="meal-ic">${ic}</span><div><div class="meal-type" style="color:${mc}">${lb}</div><div class="meal-name">${meal}</div></div></div>`
+    ).join("")}
+  </div>
+
+  <div class="card">
+    <div class="section-label" style="color:#64748b">Weekly Calories</div>
+    ${MEALS.map((meal,j) => `
+      <div class="cal-row">
+        <div class="cal-day">${DAYS[j]}</div>
+        <div style="flex:1">${bar((meal.cal/2500)*100, Math.abs(meal.cal-2500)<100?"#22c55e":"#f59e0b")}</div>
+        <div class="cal-val">${meal.cal}</div>
+      </div>`).join("")}
+  </div>`;
+}
+
+function renderTraining() {
+  const i = state.dayIdx, w = WORKOUTS[i], c = w.color;
+  const liftsDone = WORKOUTS.slice(0,6).filter((_,j) => state.checks[`${j}-lift`]).length;
+  return `
+  ${dayPicker(i, (j) => WORKOUTS[j].color)}
+  <div class="card-accent" style="background:${c}12;border:1px solid ${c}44;display:flex;align-items:center;gap:12px">
+    <span style="font-size:26px">${w.icon}</span>
+    <div>
+      <div style="font-size:9px;color:${c};letter-spacing:2px;text-transform:uppercase;font-weight:700">${w.tag}</div>
+      <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:900">${w.focus}</div>
+    </div>
+  </div>
+  ${i===3?'<div class="knee-warn">⚠️ Knee day — avoid deep squats, lunges & jumps. Stop if you feel pain, not just discomfort.</div>':""}
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="padding:10px 14px;border-bottom:1px solid #111827;font-size:9px;color:${c};letter-spacing:2px;text-transform:uppercase;font-weight:700">${i===5?"Stretch Routine":"Exercises"}</div>
+    ${w.lifts.map((ex,j) => `
+      <div class="ex-item">
+        <div class="ex-num" style="background:${c}22;border:1px solid ${c}33;color:${c}">${j+1}</div>
+        <div class="ex-text">${ex}</div>
+      </div>`).join("")}
+  </div>
+  <div class="card-accent" style="border:1px solid ${c}33">
+    <div class="section-label" style="color:${c}">Cardio</div>
+    <div style="font-size:13px;color:#e2e8f0">🏃 ${w.cardio}</div>
+  </div>
+  <div class="card">
+    <div class="section-label" style="color:#64748b">Week Completion · ${liftsDone}/6 days</div>
+    <div class="week-strip">
+      ${DAYS.map((d,j) => {
+        const dc = WORKOUTS[j].color, done = state.checks[`${j}-lift`];
+        return `<div class="week-cell" onclick="setDay(${j})" style="background:${done?dc+'22':'#111827'};border-color:${done?dc:'#1e2a3a'}">
+          <span style="color:${done?dc:'#334155'}">${d.toUpperCase()}</span>
+          <em>${done?"✅":"○"}</em>
+        </div>`;
+      }).join("")}
+    </div>
+    <div style="font-size:10px;color:#334155;margin-top:8px">Tap a day to view · tap ✅ cells to mark complete</div>
+  </div>`;
+}
+
+function renderPrep() {
+  const done = PREP.filter((_,i) => state.checks[`prep-${i}`]).length;
+  const pct = Math.round((done/PREP.length)*100);
+  return `
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800">Sunday Batch Prep</div>
+        <div style="font-size:10px;color:#334155;margin-top:1px">~75 min · mostly hands-off oven time</div>
+      </div>
+      <span style="font-family:'Syne',sans-serif;font-size:15px;font-weight:900;color:${pct===100?"#22c55e":"#f97316"}">${pct}%</span>
+    </div>
+    ${bar(pct, pct===100?"#22c55e":"#f97316", 7)}
+  </div>
+  <div class="card" style="padding:0;overflow:hidden">
+    ${PREP.map((task,i) => {
+      const key = `prep-${i}`, chk = state.checks[key];
+      return `<div class="check-item ${chk?'done':''}" onclick="toggle('${key}')">
+        <div class="check-box ${chk?'checked':''}" style="${chk?'background:#f97316;border-color:#f97316':''}">
+          ${chk?'<span style="font-size:9px;color:#000;font-weight:900">✓</span>':""}
+        </div>
+        <span class="check-text ${chk?'done':''}">${task}</span>
+      </div>`;
+    }).join("")}
+  </div>
+  ${pct===100?`<div class="success"><h3>🎉 Prep Complete!</h3><p>Your week is locked and loaded. Go enjoy Sunday.</p></div>`:""}
+  <div class="card" style="margin-top:0">
+    <div class="section-label" style="color:#3b82f6">This Week's Daily Checks</div>
+    ${DAYS.map((d,i) => {
+      const dayDone = ["pre","lift","cardio","meals"].filter(k=>state.checks[`${i}-${k}`]).length;
+      const isToday = i === getTodayIdx();
+      return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div style="width:28px;font-size:9px;color:${isToday?'#38bdf8':'#334155'};font-weight:800">${d.toUpperCase()}</div>
+        <div style="flex:1">${bar((dayDone/4)*100, dayDone===4?"#22c55e":"#3b82f6")}</div>
+        <div style="font-size:10px;color:#475569;width:24px;text-align:right">${dayDone}/4</div>
+        ${isToday?'<div style="font-size:7px;background:#38bdf8;color:#000;border-radius:99px;padding:1px 5px;font-weight:800">TODAY</div>':""}
+      </div>`;
+    }).join("")}
+  </div>`;
+}
+
+function renderProgress() {
+  const liftsDone = DAYS.filter((_,i) => state.checks[`${i}-lift`]).length;
+  const preDone = DAYS.filter((_,i) => state.checks[`${i}-pre`]).length;
+  const cardioDone = DAYS.filter((_,i) => state.checks[`${i}-cardio`]).length;
+  const mealsDone = DAYS.filter((_,i) => state.checks[`${i}-meals`]).length;
+  return `
+  <div class="card">
+    <div class="section-label" style="color:#a855f7">Weight Log</div>
+    <div class="weight-row">
+      <input class="weight-input" id="wInput" type="number" placeholder="Weight (lbs)" value="${state.weightInput}" oninput="state.weightInput=this.value"/>
+      <button class="weight-btn" onclick="logWeight()">Log</button>
+    </div>
+    ${state.weightLog.length>0 ? state.weightLog.slice().reverse().map(e => `
+      <div class="weight-entry"><span style="color:#64748b">${e.date}</span><span style="color:#a855f7;font-weight:800">${e.val} lbs</span></div>`
+    ).join("") : '<div style="font-size:11px;color:#334155;text-align:center;padding:8px 0">Log your morning weight to track progress</div>'}
+  </div>
+  <div class="card">
+    <div class="section-label" style="color:#22c55e">This Week's Accountability</div>
+    ${[["🏋️","Workouts",liftsDone,6,"#3b82f6"],["⚡","Pre-Workout",preDone,6,"#f97316"],["🏃","Cardio",cardioDone,6,"#a855f7"],["🥗","Meals on Track",mealsDone,7,"#22c55e"]].map(([ic,lb,d,t,c]) => `
+      <div class="stat-row">
+        <div class="stat-header"><span class="stat-label">${ic} ${lb}</span><span class="stat-val" style="color:${c}">${d}/${t}</span></div>
+        ${bar((d/t)*100, c, 6)}
+      </div>`).join("")}
+  </div>
+  <div class="motive">
+    <div style="font-size:28px;margin-bottom:8px">🎯</div>
+    <h2>Stay the Course, Andrew</h2>
+    <p>Every checked box is a brick in the foundation.<br>Consistency beats perfection — show up, fuel right, rest well.</p>
+    <div class="emoji-row"><span>💪</span><span>🥗</span><span>😴</span><span>🔥</span></div>
+  </div>`;
+}
+
+// ─── ACTIONS ─────────────────────────────────────────────────────────────────
+function setWater(j) { state.water = j < state.water ? j : j + 1; save(); render(); }
+function setEnergy(j) { state.energy = j; save(); render(); }
+function logWeight() {
+  const v = parseFloat(state.weightInput);
+  if (!v) return;
+  const d = new Date().toLocaleDateString("en-US",{month:"short",day:"numeric"});
+  state.weightLog.push({date:d, val:v});
+  state.weightInput = "";
+  save(); render();
+}
+
+function switchTab(tab, btn) {
+  state.tab = tab;
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  render();
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function render() {
+  const w = WORKOUTS[state.dayIdx];
+  const el = document.getElementById("tabContent");
+
+  // Update header
+  document.getElementById("headerDay").textContent = DAYS[getTodayIdx()];
+  const now = new Date();
+  document.getElementById("headerDate").textContent = now.toLocaleDateString("en-US",{month:"short",day:"numeric"});
+
+  // Render tab
+  const map = { today: renderToday, nutrition: renderNutrition, training: renderTraining, prep: renderPrep, progress: renderProgress };
+  el.innerHTML = (map[state.tab] || renderToday)();
+
+  // Scroll to top
+  document.querySelector(".content").scrollTop = 0;
+
+  // Update colors
+  updateColor();
+
+  // Update all active nav btn colors
+  const w2 = WORKOUTS[state.dayIdx];
+  document.querySelectorAll(".nav-btn.active").forEach(b => {
+    b.style.borderBottomColor = w2.color;
+    b.querySelectorAll(".nav-lb").forEach(l => l.style.color = w2.color);
+  });
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
